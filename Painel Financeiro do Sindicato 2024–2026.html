@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Painel Financeiro do Sindicato</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f5;--card:#fff;--ink:#12202e;--mut:#5a6b7b;--line:#d5dde5;--fixo:#1d3b5c;--var:#1b8a86;--obra:#e9a216;--cx:#8a6cc0;--acc:#1d3b5c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1620;--card:#15222f;--ink:#e8eef4;--mut:#93a4b5;--line:#26384a;--fixo:#6f9ad0;--var:#3cc0b8;--obra:#f2b640;--cx:#b199e0;--acc:#6f9ad0}}
+:root[data-theme="dark"]{--bg:#0d1620;--card:#15222f;--ink:#e8eef4;--mut:#93a4b5;--line:#26384a;--fixo:#6f9ad0;--var:#3cc0b8;--obra:#f2b640;--cx:#b199e0;--acc:#6f9ad0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',system-ui,Arial,sans-serif;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end;margin-bottom:20px}
+h1{font-size:clamp(26px,4vw,40px);margin:0;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:4px 0 0}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button,.chip{font:inherit;border:0;background:none;color:var(--mut);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--bg)}
+.chip{border:1px solid var(--line);background:var(--card);display:flex;gap:8px;align-items:center}
+.chip i{width:12px;height:12px;border-radius:3px;display:block}
+.chip[aria-pressed=false]{opacity:.45}.chip[aria-pressed=true]{color:var(--ink)}
+button:focus-visible{outline:3px solid var(--obra);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.kpi b{display:block;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.02em;margin:4px 0}
+.kpi span{color:var(--mut);font-size:14px}.kpi small{color:var(--mut);font-size:13px}
+.up{color:var(--obra)}
+h2{font-size:18px;margin:0 0 4px}.card p.n{color:var(--mut);font-size:14px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+#chart{position:relative}svg{width:100%;height:auto;display:block}
+svg text{fill:var(--mut);font-size:12px;font-family:inherit}
+.bar{cursor:pointer;transition:opacity .15s}.bar:hover{opacity:.8}
+#tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:8px;font-size:13px;display:none;min-width:170px;z-index:5}
+#tip div{display:flex;justify-content:space-between;gap:12px}
+.row{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;align-items:center;font-size:14px;margin:8px 0}
+.row .t{height:14px;background:var(--bg);border-radius:7px;overflow:hidden}.row .t i{display:block;height:100%;border-radius:7px}
+.row em{font-style:normal;font-weight:600;text-align:right}
+.tw{overflow-x:auto;margin-top:12px}table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:600}tr.hl td{background:color-mix(in srgb,var(--obra) 14%,transparent)}
+footer{color:var(--mut);font-size:13px;margin-top:16px}
+</style></head><body><div class="wrap">
+<header><div><h1>Painel financeiro do sindicato</h1><p class="sub">Despesas de janeiro de 2024 a outubro de 2026, a partir da planilha mensal de contas</p></div>
+<div class="ctl"><div class="seg" id="yr" role="group" aria-label="Ano"></div><button class="chip" id="th" aria-label="Alternar tema">Tema</button></div></header>
+<div class="ctl" id="cats" style="margin-bottom:12px" role="group" aria-label="Categorias"></div>
+<div class="kpis" id="kpis"></div>
+<div class="card" id="chart"><h2 id="ct"></h2><p class="n">Passe o mouse ou toque em uma barra para ver o detalhe do mês.</p><div id="svgw"></div><div id="tip"></div></div>
+<div class="grid"><div class="card"><h2>Composição por categoria</h2><p class="n" id="cn"></p><div id="comp"></div></div>
+<div class="card"><h2>Maiores despesas de 2025</h2><p class="n">Valores anuais da aba ANUAL2025.</p><div id="top"></div></div></div>
+<div class="card" style="margin-top:12px"><h2>Dados mensais</h2><p class="n">Os meses mais caros do recorte aparecem destacados.</p><div class="tw"><table id="tb"></table></div></div>
+<footer>Dezembro de 2024 inclui R$ 166,5 mil lançados na caixinha, valor atípico que vale conferir. Novembro e dezembro de 2026 ainda estão em branco na planilha.</footer>
+</div><script>
+const D={"2024": {"VARIÁVEL": [8709.99, 3837.93, 2699.13, 3637.59, 2164.86, 2671.98, 3147.84, 15758.82, 55490.84, 5003.01, 21264, 28159.53], "FIXO": [19974.89, 21457.4, 26258.22, 20052.15, 20062.35, 20098.15, 20733.51, 19075.27, 27605.47, 22153.11, 30154.35, 27371.37], "CAIXINHA": [672.31, 500, 500, 20, 262.81, 220.75, 297.83, 0, 575.94, 382.94, 3388.3, 166534.27], "OBRA": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "TOTAL": [29357.19, 25795.33, 29457.35, 23709.74, 22490.02, 22990.88, 24179.18, 34834.09, 83672.25, 27539.06, 54806.65, 222065.17]}, "2026": {"VARIÁVEL": [8600.08, 98538.12, 94525.62, 3411.31, 19102.26, 5394.43, 6777.2, 10422.95, 12527.42, 21166.85, 0, 0], "FIXO": [27384.34, 28135.57, 29033.8, 28745.8, 29553.14, 29596.39, 29598.81, 25193.81, 28305.61, 39144.7, 0, 0], "CAIXINHA": [35.04, 0, 0, 0, 0, 0, 0, 490.24, 140, 633.1, 0, 0], "OBRA": [166.18, 0, 0, 43000, 20373.49, 76884.94, 69023.16, 400, 0, 0, 0, 0], "TOTAL": [36185.64, 126673.69, 123559.42, 75157.11, 69028.89, 111875.76, 105399.17, 36507.0, 40973.03, 60944.65, 0, 0]}, "2025": {"VARIÁVEL": [26753.14, 26939.53, 25206.6, 36867.52, 5255.79, 61951.49, 10336.03, 15307.37, 16844.26, 19283.73, 90129.05, 7827.71], "FIXO": [25260.14, 27802.02, 25292.97, 25542.77, 26545.24, 31997.94, 28222.08, 28462.31, 28498.6, 29742.3, 34371.3, 34489.05], "CAIXINHA": [1023.21, 132.5, 55.2, 0, 200.12, 0, 1664.95, 0, 796.77, 486.62, 204.54, 117.08], "OBRA": [54803.3, 35868.23, 84933.47, 96897.3, 86936.93, 57630.47, 15037.27, 11087.95, 8216.36, 0, 6915.74, 0], "TOTAL": [107839.79, 90742.28, 135488.24, 159307.59, 118938.08, 151579.9, 55260.33, 54857.63, 54355.99, 49512.65, 131620.63, 42433.84]}};
+const MS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const CK=['FIXO','VARIÁVEL','OBRA','CAIXINHA'],CN={FIXO:'Fixos','VARIÁVEL':'Variáveis',OBRA:'Obra',CAIXINHA:'Caixinha'},CV={FIXO:'--fixo','VARIÁVEL':'--var',OBRA:'--obra',CAIXINHA:'--cx'};
+const TOP=[['Reconstrução do sindicato',218000],['Vale-natal (cartões/brinde)',84000],['Ajuda de gastos · Washington',82010],['Serviços adv. Marcelo',60000],['Serviços adv. Maristela',42000],['Funcionária Fabiane',31368],['Serviço contábil',27540],['Claudio Luiz de Oliveira Silva',24000]];
+const P=[];for(const y of [2024,2025,2026])for(let m=0;m<12;m++){const t=D[y].TOTAL[m];if(t>0){const o={y,m,t};CK.forEach(c=>o[c]=D[y][c][m]);P.push(o)}}
+const br=v=>'R$ '+Math.round(v).toLocaleString('pt-BR'),sh=v=>v>=1e3?(v/1e3).toFixed(0)+' mil':'0';
+let yr='all';const on=new Set(CK);
+const $=id=>document.getElementById(id);
+function build(){
+ $('yr').innerHTML=['all',2024,2025,2026].map(v=>`<button aria-pressed="${v==yr}" data-y="${v}">${v=='all'?'Todos':v}</button>`).join('');
+ $('cats').innerHTML=CK.map(c=>`<button class="chip" aria-pressed="${on.has(c)}" data-c="${c}"><i style="background:var(${CV[c]})"></i>${CN[c]}</button>`).join('');
+ $('yr').onclick=e=>{const b=e.target.closest('button');if(b){yr=b.dataset.y=='all'?'all':+b.dataset.y;build()}};
+ $('cats').onclick=e=>{const b=e.target.closest('button');if(!b)return;const c=b.dataset.c;on.has(c)?(on.size>1&&on.delete(c)):on.add(c);build()};
+ render()}
+function render(){
+ const pts=P.filter(p=>yr=='all'||p.y==yr).map(p=>({...p,s:CK.reduce((a,c)=>a+(on.has(c)?p[c]:0),0)}));
+ const tot=pts.reduce((a,p)=>a+p.s,0),avg=tot/pts.length,mx=pts.reduce((a,p)=>p.s>a.s?p:a);
+ const ob=pts.reduce((a,p)=>a+p.OBRA,0),fx=pts.reduce((a,p)=>a+p.FIXO,0)/pts.length;
+ const pv=yr==2025?pts.reduce((a,p)=>a+p.s,0)/P.filter(p=>p.y==2024).reduce((a,p)=>a+CK.reduce((b,c)=>b+(on.has(c)?p[c]:0),0),0)-1:null;
+ $('kpis').innerHTML=[['Total no período',br(tot),pts.length+' meses'+(pv!=null?` · <span class="up">${pv>0?'+':''}${Math.round(pv*100)}% vs 2024</span>`:'')],['Média mensal',br(avg),'considerando as categorias ativas'],['Maior mês',br(mx.s),MS[mx.m]+' de '+mx.y],['Despesas fixas por mês',br(fx),'folha, honorários e ajudas'],['Gastos com a obra',br(ob),ob?Math.round(ob/(P.filter(p=>yr=='all'||p.y==yr).reduce((a,p)=>a+p.t,0))*100)+'% do total geral':'sem obra no período']].map(k=>`<div class="card kpi"><span>${k[0]}</span><b>${k[1]}</b><small>${k[2]}</small></div>`).join('');
+ $('ct').textContent='Despesa mensal'+(yr=='all'?' · jan/2024 a out/2026':' · '+yr);
+ // chart
+ const W=1000,H=340,L=56,B=34,T=10,n=pts.length,bw=(W-L)/n,max=Math.max(...pts.map(p=>p.s))*1.08;
+ const yy=v=>H-B-v/max*(H-B-T);let g='';
+ for(let i=0;i<=4;i++){const v=max/1.08*i/4;g+=`<line x1="${L}" x2="${W}" y1="${yy(v)}" y2="${yy(v)}" stroke="var(--line)"/><text x="${L-8}" y="${yy(v)+4}" text-anchor="end">${sh(v)}</text>`}
+ pts.forEach((p,i)=>{let a=0;const x=L+i*bw+bw*.15,w=bw*.7;
+  g+=`<g class="bar" data-i="${i}">`;
+  CK.forEach(c=>{if(!on.has(c)||p[c]<=0)return;const h=p[c]/max*(H-B-T);g+=`<rect x="${x}" y="${yy(a+p[c])}" width="${w}" height="${h}" fill="var(${CV[c]})"/>`;a+=p[c]});
+  g+=`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${H-B-T}" fill="transparent"/></g>`;
+  if(n<=13||p.m%3==0)g+=`<text x="${x+w/2}" y="${H-12}" text-anchor="middle">${MS[p.m]}${yr=='all'&&p.m==0?"/"+String(p.y).slice(2):''}</text>`});
+ $('svgw').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Despesa mensal empilhada por categoria">${g}</svg>`;
+ const tip=$('tip'),ch=$('chart');
+ const show=(e,i)=>{const p=pts[i];tip.innerHTML=`<b>${MS[p.m]} de ${p.y}</b>`+CK.filter(c=>on.has(c)).map(c=>`<div><span>${CN[c]}</span><span>${br(p[c])}</span></div>`).join('')+`<div><b>Total</b><b>${br(p.s)}</b></div>`;tip.style.display='block';const r=ch.getBoundingClientRect();let x=e.clientX-r.left+14;if(x>r.width-190)x-=200;tip.style.left=x+'px';tip.style.top=Math.max(40,e.clientY-r.top-60)+'px'};
+ document.querySelectorAll('.bar').forEach(b=>{b.onmousemove=e=>show(e,+b.dataset.i);b.onclick=e=>show(e,+b.dataset.i);b.onmouseleave=()=>tip.style.display='none'});
+ // composition
+ const sums=CK.map(c=>[c,pts.reduce((a,p)=>a+p[c],0)]),all=sums.reduce((a,s)=>a+s[1],0);
+ $('cn').textContent='Participação de cada categoria no período selecionado.';
+ $('comp').innerHTML=sums.map(([c,v])=>`<div class="row" style="opacity:${on.has(c)?1:.35}"><span>${CN[c]}</span><div class="t"><i style="width:${v/all*100}%;background:var(${CV[c]})"></i></div><em>${br(v)}<br><small style="color:var(--mut);font-weight:400">${(v/all*100).toFixed(1)}%</small></em></div>`).join('');
+ $('top').innerHTML=TOP.map(([n,v],i)=>`<div class="row" style="grid-template-columns:1fr 90px"><span>${n}</span><em>${br(v)}</em><div class="t" style="grid-column:1/3"><i style="width:${v/218000*100}%;background:var(${i?'--fixo':'--obra'})"></i></div></div>`).join('');
+ const top3=[...pts].sort((a,b)=>b.s-a.s).slice(0,3).map(p=>p.y+'-'+p.m);
+ $('tb').innerHTML='<tr><th>Mês</th>'+CK.map(c=>`<th>${CN[c]}</th>`).join('')+'<th>Total</th></tr>'+pts.map(p=>`<tr class="${top3.includes(p.y+'-'+p.m)?'hl':''}"><td>${MS[p.m]}/${p.y}</td>`+CK.map(c=>`<td>${on.has(c)?br(p[c]):'–'}</td>`).join('')+`<td><b>${br(p.s)}</b></td></tr>`).join('')}
+$('th').onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark'};
+build();
+</script></body></html>
